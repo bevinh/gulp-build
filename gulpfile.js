@@ -2,10 +2,9 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     sass = require('gulp-sass'),
-    csso = require('gulp-csso'),
+    cleanCSS = require('gulp-clean-css'),
     sourcemaps = require('gulp-sourcemaps'),
-    del = require('del'),
-    useref = require('gulp-useref');
+    del = require('del');
 
 var options = {
     scripts: ['src/js/global.js', 'src/js/circle/circle.js', 'src/js/circle/autogrow.js'],
@@ -19,7 +18,16 @@ gulp.task('default', function(){
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('scripts', ['clean'], function() {
+gulp.task('cleanTmp', function(){
+    return del(['tmp']);
+});
+
+gulp.task('clean', function() {
+    return del(['dist']);
+
+});
+
+gulp.task('scripts', function() {
     // Minify and copy all JavaScript
     // with sourcemaps
     return gulp.src(options.scripts)
@@ -29,23 +37,24 @@ gulp.task('scripts', ['clean'], function() {
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('dist/js'));
 });
-gulp.task('sass', ['clean'], function(){
+gulp.task('sass', function(){
+    //Process the sass before minifying
     return gulp.src(options.cssfiles)
+        .pipe(concat('all.min.scss'))
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest('tmp/css'));
 });
 
-gulp.task('styles', ['clean', 'sass'], function(){
+gulp.task('styles', function(){
     //Minify and copy all css with sourcemaps
-    return gulp.src('tmp/css/global.css')
+    return gulp.src('tmp/css/*.css')
         .pipe(sourcemaps.init())
-        .pipe(csso())
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('dist/styles/'));
-})
-
-
-gulp.task('clean', function() {
-    return del(['dist', 'tmp']);
-
+        .pipe(cleanCSS({debug: true}, function(details) {
+            console.log(details.name + ': ' + details.stats.originalSize);
+            console.log(details.name + ': ' + details.stats.minifiedSize);
+        }))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('dist/styles'));
 });
+
+gulp.task('all', gulp.series('clean', 'scripts', 'sass', 'styles', 'cleanTmp'));
