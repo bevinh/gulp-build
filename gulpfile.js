@@ -2,6 +2,7 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     sass = require('gulp-sass'),
+    imagemin = require('gulp-imagemin'),
     cleanCSS = require('gulp-clean-css'),
     sourcemaps = require('gulp-sourcemaps'),
     del = require('del');
@@ -51,6 +52,12 @@ gulp.task('styles', function(){
         .pipe(cleanCSS())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('dist/styles'));
+});
+
+gulp.task('images', function(){
+    return gulp.src('src/images/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest('dist/content'))
 });
 
 gulp.task('all', gulp.series('clean', 'scripts', 'sass', 'styles', 'cleanTmp'));
