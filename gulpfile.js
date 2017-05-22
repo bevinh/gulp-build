@@ -17,32 +17,38 @@ var options = {
 const server = browserSync.create();
 
 
-
+//Server task
 gulp.task('serve', function() {
     server.init({
         server: {
             baseDir: 'dist/'
         }
     });
-
+//add the build task when the css changes in the sass dir
     gulp.watch(options.src + "/sass/global.scss", gulp.series('build'));
+//add the reload task once the css file changes in the main dir
     gulp.watch("dist/styles/*.css").on('change', server.reload)
 
 });
 
 
-
+//task to clean up a tmp directory used in transformation of the sass
 gulp.task('cleanTmp', function(){
     return del(['tmp']);
 });
 
+
 gulp.task('clean', function() {
     return del(['dist']);
 });
+
+
 gulp.task('html', function(){
     return gulp.src('src/index.html')
         .pipe(gulp.dest('dist'));
 });
+
+
 gulp.task('scripts', function() {
     // Minify and copy all JavaScript
     // with sourcemaps
@@ -53,6 +59,7 @@ gulp.task('scripts', function() {
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('dist/js'));
 });
+
 gulp.task('sass', function(){
     //Process the sass before minifying
     return gulp.src(options.cssfiles)
@@ -77,17 +84,7 @@ gulp.task('images', function(){
 });
 
 
-gulp.task('webserver', function(){
-    gulp.src('dist/')
-        .pipe(webserver({
-            livereload: true,
-            directoryListing: {
-                enable: false,
-                path: 'dist/'
-            },
-            open: true
-        }))
-});
+
 gulp.task('build', gulp.series('clean', 'scripts', 'sass', 'styles', 'images', 'html', 'cleanTmp'));
 gulp.task('default', gulp.series('serve'));
 
