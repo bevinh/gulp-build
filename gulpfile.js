@@ -5,6 +5,7 @@ var gulp = require('gulp'),
     imagemin = require('gulp-imagemin'),
     cleanCSS = require('gulp-clean-css'),
     sourcemaps = require('gulp-sourcemaps'),
+    browserSync = require('browser-sync'),
     del = require('del');
 
 var options = {
@@ -13,11 +14,23 @@ var options = {
     src: 'src'
 };
 
-gulp.task('default', function(){
-    return gulp.src('src/*.html')
-        .pipe(useref())
-        .pipe(gulp.dest('dist'));
+const server = browserSync.create();
+
+
+
+gulp.task('serve', function() {
+    server.init({
+        server: {
+            baseDir: 'dist/'
+        }
+    });
+
+    gulp.watch(options.src + "/sass/global.scss", gulp.series('build'));
+    gulp.watch("dist/styles/*.css").on('change', server.reload)
+
 });
+
+
 
 gulp.task('cleanTmp', function(){
     return del(['tmp']);
@@ -26,7 +39,10 @@ gulp.task('cleanTmp', function(){
 gulp.task('clean', function() {
     return del(['dist']);
 });
-
+gulp.task('html', function(){
+    return gulp.src('src/index.html')
+        .pipe(gulp.dest('dist'));
+});
 gulp.task('scripts', function() {
     // Minify and copy all JavaScript
     // with sourcemaps
@@ -60,4 +76,19 @@ gulp.task('images', function(){
         .pipe(gulp.dest('dist/content'))
 });
 
-gulp.task('all', gulp.series('clean', 'scripts', 'sass', 'styles', 'cleanTmp'));
+
+gulp.task('webserver', function(){
+    gulp.src('dist/')
+        .pipe(webserver({
+            livereload: true,
+            directoryListing: {
+                enable: false,
+                path: 'dist/'
+            },
+            open: true
+        }))
+});
+gulp.task('build', gulp.series('clean', 'scripts', 'sass', 'styles', 'images', 'html', 'cleanTmp'));
+gulp.task('default', gulp.series('serve'));
+
+
