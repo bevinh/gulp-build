@@ -24,7 +24,6 @@ gulp.task('cleanTmp', function(){
 
 gulp.task('clean', function() {
     return del(['dist']);
-
 });
 
 gulp.task('scripts', function() {
@@ -49,10 +48,7 @@ gulp.task('styles', function(){
     //Minify and copy all css with sourcemaps
     return gulp.src('tmp/css/*.css')
         .pipe(sourcemaps.init())
-        .pipe(cleanCSS({debug: true}, function(details) {
-            console.log(details.name + ': ' + details.stats.originalSize);
-            console.log(details.name + ': ' + details.stats.minifiedSize);
-        }))
+        .pipe(cleanCSS())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('dist/styles'));
 });
